@@ -1,0 +1,212 @@
+{
+	"name": "copy_sqldb_to_adls",
+	"properties": {
+		"activities": [
+			{
+				"name": "fetch_last_load_date",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "select date from last_load_date \nunion\nselect max(Date_ID) from carsales_data",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "ds_sqldb",
+						"type": "DatasetReference",
+						"parameters": {
+							"p_tablename": {
+								"value": "last_load_date",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "sqldb_to_adls",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "fetch_last_load_date",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "select * from carsales_data where Date_ID > '@{activity('fetch_last_load_date').output.value[0].date}'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_sqldb",
+						"type": "DatasetReference",
+						"parameters": {
+							"p_tablename": "carsales_data"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_adls",
+						"type": "DatasetReference",
+						"parameters": {
+							"p_layer": "bronze",
+							"p_directory": "raw",
+							"p_filename": "source"
+						}
+					}
+				]
+			},
+			{
+				"name": "update_last_load_date",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "sqldb_to_adls",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[update_last_load_date]",
+					"storedProcedureParameters": {
+						"load_date": {
+							"value": {
+								"value": "@activity('fetch_last_load_date').output.value[1].date",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_azure_sqldb",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "broze_to_silver",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "update_last_load_date",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Users/gagandeepsingh1105@gmail.com/carsales_project/data_transformation"
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_azure_databricks",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "silver_to_gold",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "broze_to_silver",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Users/gagandeepsingh1105@gmail.com/carsales_project/star_schema",
+					"baseParameters": {
+						"load_type": "I"
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_azure_databricks",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"test_param": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-05-12T14:06:52Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

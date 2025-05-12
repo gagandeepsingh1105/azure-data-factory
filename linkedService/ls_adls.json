@@ -1,0 +1,12 @@
+{
+	"name": "ls_adls",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://carsalesdeltalake.dfs.core.windows.net/",
+			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQDgyNDE3MzY3LThCNDktNEJFRi04MkM3LTFEQ0I4Q0YxNTYxOV8xZDY4ZDZhOS00YzQ3LTRjYWQtYWQ1Yi0wZGFjNDM2YTlmMzIiDQp9"
+		}
+	}
+}

@@ -1,0 +1,9 @@
+{
+	"name": "carsalespipeline-adf",
+	"location": "centralus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "8dd1071d-c03e-4de9-8560-226d1a133d3a",
+		"tenantId": "987e8cef-9ef1-4579-b01d-b1cb989997bb"
+	}
+}

@@ -1,0 +1,218 @@
+{
+	"name": "dynamic_copy",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get_Table_List",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "select table_name,\nlast_read_snapshot\n from table_details where is_active=1",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "ds_azure_sql",
+						"type": "DatasetReference",
+						"parameters": {
+							"p_table_name": "table_details"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Iterate_Table_List",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get_Table_List",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get_Table_List').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Copy_Table",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Get_max_Snapshot",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "@concat('select * from ',item().table_name,' where snapshot_date > ''',item().last_read_snapshot, '''')",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "ds_azure_sql",
+									"type": "DatasetReference",
+									"parameters": {
+										"p_table_name": {
+											"value": "@item().table_name",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "ds_adls_csv",
+									"type": "DatasetReference",
+									"parameters": {
+										"p_container": "adf-ques/azure-demo",
+										"p_directory": {
+											"value": "@item().table_name",
+											"type": "Expression"
+										},
+										"p_filename": {
+											"value": "@concat(activity('Get_max_Snapshot').output.value[0].max_date,'.csv')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "update_last_read_snapshot",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Copy_Table",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[update_last_read_snapshot]",
+								"storedProcedureParameters": {
+									"table_name": {
+										"value": {
+											"value": "@item().table_name",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"snapshot_date": {
+										"value": {
+											"value": "@activity('Get_max_Snapshot').output.value[0].max_date",
+											"type": "Expression"
+										},
+										"type": "Datetime"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "ls_azure_sql",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Get_max_Snapshot",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "@concat('select max(snapshot_date) as max_date from ',item().table_name)",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "ds_azure_sql",
+									"type": "DatasetReference",
+									"parameters": {
+										"p_table_name": {
+											"value": "@item().table_name",
+											"type": "Expression"
+										}
+									}
+								},
+								"firstRowOnly": false
+							}
+						}
+					]
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2025-05-12T14:06:52Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
