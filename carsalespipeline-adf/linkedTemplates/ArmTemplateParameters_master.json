@@ -1,0 +1,54 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "carsalespipeline-adf"
+		},
+		"ls_adls_accountKey": {
+			"value": ""
+		},
+		"ls_azure_databricks_accessToken": {
+			"value": ""
+		},
+		"ls_azure_sql_password": {
+			"value": ""
+		},
+		"ls_azure_sqldb_password": {
+			"value": ""
+		},
+		"ls_adls_properties_typeProperties_url": {
+			"value": "https://carsalesdeltalake.dfs.core.windows.net/"
+		},
+		"ls_azure_databricks_properties_typeProperties_existingClusterId": {
+			"value": "0225-165112-4i4zgfcn"
+		},
+		"ls_azure_sql_properties_typeProperties_server": {
+			"value": "azure-demo-srvr.database.windows.net"
+		},
+		"ls_azure_sql_properties_typeProperties_database": {
+			"value": "azure-demo-db"
+		},
+		"ls_azure_sql_properties_typeProperties_userName": {
+			"value": "demo-admin"
+		},
+		"ls_azure_sqldb_properties_typeProperties_server": {
+			"value": "carsales-dbserver.database.windows.net"
+		},
+		"ls_azure_sqldb_properties_typeProperties_database": {
+			"value": "carsales-db"
+		},
+		"ls_azure_sqldb_properties_typeProperties_userName": {
+			"value": "carsalesadmin"
+		},
+		"ls_git_properties_typeProperties_url": {
+			"value": "https://raw.githubusercontent.com/"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}
