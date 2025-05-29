@@ -627,7 +627,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/dynamic_copy')]",
+			"name": "[concat(parameters('factoryName'), '/metadata_driven_copy')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -1047,9 +1047,8 @@
 						"}",
 						"source(allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     ignoreNoFilesFound: false,",
-						"     skipLines: 1) ~> source1",
-						"source1 derive(snapshot = $p_snapshot) ~> derivedColumn1",
+						"     ignoreNoFilesFound: false) ~> source1",
+						"source1 derive(snapshot = toDate($p_snapshot,'yyyy-MM-dd')) ~> derivedColumn1",
 						"derivedColumn1 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     partitionFileNames:['date.csv'],",
