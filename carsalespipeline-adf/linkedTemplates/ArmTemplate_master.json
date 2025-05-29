@@ -33,15 +33,15 @@
 		},
 		"ls_azure_sql_properties_typeProperties_server": {
 			"type": "string",
-			"defaultValue": "azure-demo-srvr.database.windows.net"
+			"defaultValue": "adf-practice-srvr.database.windows.net"
 		},
 		"ls_azure_sql_properties_typeProperties_database": {
 			"type": "string",
-			"defaultValue": "azure-demo-db"
+			"defaultValue": "adf-practice-db"
 		},
 		"ls_azure_sql_properties_typeProperties_userName": {
 			"type": "string",
-			"defaultValue": "demo-admin"
+			"defaultValue": "sqladmin"
 		},
 		"ls_azure_sqldb_properties_typeProperties_server": {
 			"type": "string",

@@ -24,13 +24,13 @@
 			"value": "0225-165112-4i4zgfcn"
 		},
 		"ls_azure_sql_properties_typeProperties_server": {
-			"value": "azure-demo-srvr.database.windows.net"
+			"value": "adf-practice-srvr.database.windows.net"
 		},
 		"ls_azure_sql_properties_typeProperties_database": {
-			"value": "azure-demo-db"
+			"value": "adf-practice-db"
 		},
 		"ls_azure_sql_properties_typeProperties_userName": {
-			"value": "demo-admin"
+			"value": "sqladmin"
 		},
 		"ls_azure_sqldb_properties_typeProperties_server": {
 			"value": "carsales-dbserver.database.windows.net"
