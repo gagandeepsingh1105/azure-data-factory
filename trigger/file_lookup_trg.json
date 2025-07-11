@@ -1,0 +1,24 @@
+{
+	"name": "file_lookup_trg",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "adf_strg_trg",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "BlobEventsTrigger",
+		"typeProperties": {
+			"blobPathBeginsWith": "/adf-ques/blobs/practice_ques/superstore.csv",
+			"ignoreEmptyBlobs": true,
+			"scope": "/subscriptions/8dbcf74f-7d65-40a4-8ed8-c055f70aff9e/resourceGroups/carsales-rg/providers/Microsoft.Storage/storageAccounts/carsalesdeltalake",
+			"events": [
+				"Microsoft.Storage.BlobCreated"
+			]
+		}
+	}
+}
