@@ -43,6 +43,9 @@
 		},
 		"ls_git_properties_typeProperties_url": {
 			"value": "https://raw.githubusercontent.com/"
+		},
+		"file_lookup_trg_properties_typeProperties_scope": {
+			"value": "/subscriptions/8dbcf74f-7d65-40a4-8ed8-c055f70aff9e/resourceGroups/carsales-rg/providers/Microsoft.Storage/storageAccounts/carsalesdeltalake"
 		}
 	}
 }
